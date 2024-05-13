@@ -34,16 +34,24 @@ pipeline = [
      
     #Add nb of # and @ on each tweet
     {"$addFields":{"hash_count" : {"$subtract": [{"$size" : {"$split" : ["$text","#"]} },1 ]  }},  },
-    {"$addFields":{"arobase_count" : {"$subtract": [{"$size" : {"$split" : ["$text","@"]} },1 ]  }},  },
+    {"$addFields":{"at_count" : {"$subtract": [{"$size" : {"$split" : ["$text","@"]} },1 ]  }},  },
     #manage text field
     {"$addFields":{"tweet_url_bool" : { "$cond" : [{"$eq" : ["$user.url","null"]},True,False]}},  },
     {"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},0,{"$strLenBytes" : "$user.description"}]}},  },
+    #mange user.created_at date fields
+    {"$addFields":{"user_date" : {"$dateFromString":{"dateString" : "$user.created_at"}}  }},
+    {"$addFields":{"test" : {"$max" : "$user_date"}}},
+    {"$addFields":{"date_diff" : {"$dateDiff": {
+        "startDate" : "$user_date",
+        "endDate" : {"$max" : "$user_date" },
+        "unit" : "day" }  }}},
     #group by user 
     {"$group":{ #user global information
                "_id":"$user.id",
                "name" : {"$last":"$user.name"},
-               "created_date" : {"$last":"$user.created_at"},
-               #"datediff" : {"$avg":{"$dateDiff": {"startDate" : "$created_date","endDate" : {"$max" : "$created_date" },"unit" : "day" }}},
+               #"created_date" : {"$last":"$user.created_at"},
+               "created_date" : {"$last":{"dateFromString":{"dateString" : "$user.created_at"}}},
+               "datediff" : {"$avg":"$date_diff"},
                "verified":{"$last":"$user.verified"},
                #user numeric information
                "friend_nb":{"$avg":"$user.friends_count"},
@@ -52,11 +60,11 @@ pipeline = [
                "favorites_nb":{"$avg":"$user.favourites_count"},
                #Text Fields
                "url_bool" : {"$max" :"$tweet_url_bool" },
-               "len_description" : {"$avg" : "$tweet_len_description"},
+               "len_description" : {"$last" : "$tweet_len_description"},
                #tweet stats
                "tweet_nb" : {"$sum":1},
-               "hash_nb" : {"$sum" : "$hash_count"},
                "hash_avg" : {"$avg" : "$hash_count"},
+               "at_avg" : {"$avg" : "$at_count"},
                "retweet_avg" : {"$avg" : "$retweet.count"},
                "tweet_user_count":{"$max":"$user.statuses_count"}
                
