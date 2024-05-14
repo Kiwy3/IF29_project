@@ -30,28 +30,21 @@ for date in max_date_cursor:
 #Make the aggregation pipeline
 pipeline = [
     {"$sort":{"current_time":1}}, #to allow $last to effectively be the last
-    {"$limit": 3}, #if we need to test it on few lines
+    {"$limit": 100}, #if we need to test it on few lines
      
     #Add nb of # and @ on each tweet
     {"$addFields":{"hash_count" : {"$subtract": [{"$size" : {"$split" : ["$text","#"]} },1 ]  }},  },
     {"$addFields":{"at_count" : {"$subtract": [{"$size" : {"$split" : ["$text","@"]} },1 ]  }},  },
     #manage text field
     {"$addFields":{"tweet_url_bool" : { "$cond" : [{"$eq" : ["$user.url","null"]},True,False]}},  },
-    {"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},0,{"$strLenBytes" : "$user.description"}]}},  },
+    {"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},{"$strLenBytes" : "$user.description"},0 ]}},  },
     #mange user.created_at date fields
     {"$addFields":{"user_date" : {"$dateFromString":{"dateString" : "$user.created_at"}}  }},
-    {"$addFields":{"test" : {"$max" : "$user_date"}}},
-    {"$addFields":{"date_diff" : {"$dateDiff": {
-        "startDate" : "$user_date",
-        "endDate" : {"$max" : "$user_date" },
-        "unit" : "day" }  }}},
     #group by user 
     {"$group":{ #user global information
                "_id":"$user.id",
                "name" : {"$last":"$user.name"},
-               #"created_date" : {"$last":"$user.created_at"},
-               "created_date" : {"$last":{"dateFromString":{"dateString" : "$user.created_at"}}},
-               "datediff" : {"$avg":"$date_diff"},
+               "created_date" : {"$last":"$user_date"},
                "verified":{"$last":"$user.verified"},
                #user numeric information
                "friend_nb":{"$avg":"$user.friends_count"},
@@ -66,12 +59,11 @@ pipeline = [
                "hash_avg" : {"$avg" : "$hash_count"},
                "at_avg" : {"$avg" : "$at_count"},
                "retweet_avg" : {"$avg" : "$retweet.count"},
-               "tweet_user_count":{"$max":"$user.statuses_count"}
-               
+               "tweet_user_count":{"$max":"$user.statuses_count"} 
                }}
 
     #Export it on another database
-     ,{"$out" : "user_db_V1"}
+     ,{"$out" : "user_db_sample"}
 ]
 
 st = time.localtime() #to collect the time of start
@@ -79,9 +71,9 @@ collec.aggregate(pipeline)
 end = time.localtime() #to collect the time of end of the aggregation
 
 #print the doc for test
-test = collec.aggregate(pipeline)
+"""test = collec.aggregate(pipeline)
 for doc in test:
-    print(doc)
+    print(doc)"""
 
 #close the mongodb connection
 client.close()
