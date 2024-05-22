@@ -1,0 +1,4 @@
+TO DO IF29 : 
+
+ - url_bool est bugué, 100% de faux (ou inutile)
+ - 
