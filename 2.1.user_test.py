@@ -8,15 +8,24 @@ author : Nathan Davouse
 #Import librairies
 from pymongo import MongoClient
 import time
-from datetime import datetime
 
 #Connection with mongoDB
 client = MongoClient("localhost", 27017)
 db = client["IF29"]
 collec = db.tweets_global
 
-#define the comparaison date
-max_date = datetime(2018, 7, 1)
+#find the most recent date
+"""
+first_pip = [
+    {"$project": {"user.created_at": 1}},
+    {"$sort":{"user.created_at":1}},
+    {"$limit":1}
+
+]
+
+max_date_cursor = collec.aggregate(first_pip)
+for date in max_date_cursor:
+    max_date = date["user"]["created_at"]"""
 
 #Make the aggregation pipeline
 pipeline = [
@@ -28,7 +37,7 @@ pipeline = [
     {"$addFields":{"at_count" : {"$subtract": [{"$size" : {"$split" : ["$text","@"]} },1 ]  }},  },
     #manage text field
     {"$addFields":{"tweet_url_bool" : { "$cond" : [{"$eq" : ["$user.url","null"]},True,False]}},  },
-    #{"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},{"$strLenBytes" : "$user.description"},0 ]}},  },
+    {"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},{"$strLenBytes" : "$user.description"},0 ]}},  },
     #mange user.created_at date fields
     {"$addFields":{"user_date" : {"$dateFromString":{"dateString" : "$user.created_at"}}  }},
     #group by user 
@@ -44,26 +53,17 @@ pipeline = [
                "favorites_nb":{"$avg":"$user.favourites_count"},
                #Text Fields
                "url_bool" : {"$max" :"$tweet_url_bool" },
-               "description" : {"$last" : "$user.description"},
+               "len_description" : {"$last" : "$tweet_len_description"},
                #tweet stats
                "tweet_nb" : {"$sum":1},
                "hash_avg" : {"$avg" : "$hash_count"},
                "at_avg" : {"$avg" : "$at_count"},
                "retweet_avg" : {"$avg" : "$retweet.count"},
                "tweet_user_count":{"$max":"$user.statuses_count"} 
-               }},
-    #Make the visibility attribute
-    {"$addFields": { "user_lifetime":{"$dateDiff": {"startDate" : "$created_date",
-                                   "endDate" : max_date,
-                                   "unit" : "day"}}     }},
-    {"$addFields" : {"tweet_frequency" : {"$divide" : ["$tweet_user_count","$user_lifetime"] }}},
-    {"$addFields" : {"friend_frequency" : {"$divide" : ["$friend_nb","$user_lifetime"] }}},
-    {"$addFields" : {"visibility" : {"$add" : ["$tweet_frequency","$friend_frequency"] }}},
-    #Make the aggressivity attribute
-    {"$addFields" : {"Aggressivity" : {"$add" : ["$at_avg","$hash_avg"] }}},
+               }}
+
     #Export it on another database
-     #,{"$out" : "user_db_sample"} #Sample database for small test
-    {"$out" : "user_db_sample"}
+     ,{"$out" : "user_db_sample"}
 ]
 
 st = time.localtime() #to collect the time of start
