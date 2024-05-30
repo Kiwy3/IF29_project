@@ -29,8 +29,18 @@ X.sort_values("total",inplace=True)
 X["label"] = 1
 X.iloc[:10000,3]=0
 X.iloc[-10000:,3]=2
+X[data.index]
+
+#Put the index back in the data field
+X.sort_index(inplace=True,ascending=True)
+data["label"] = X["label"]
+
+#Export the collection to mongo
+db.user_label.drop()
+db.user_label.insert_many(data.to_dict('records'))
 
 #Plot 
+"""
 import matplotlib.pyplot as plt
 plt.scatter(X.visibility[X["label"]==0],X.Aggressivity[X["label"]==0],s=0.5,c="blue",label = "non suspicious")
 plt.scatter(X.visibility[X["label"]==1],X.Aggressivity[X["label"]==1],s=0.5,c="grey",label = "undefined")
@@ -39,4 +49,4 @@ plt.scatter(X.visibility[X["label"]==2],X.Aggressivity[X["label"]==2],s=0.5,c="r
 plt.legend()
 plt.xlabel("visibility")
 plt.ylabel("aggressivity")
-plt.show()
+plt.show()"""
