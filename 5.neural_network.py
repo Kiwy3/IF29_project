@@ -19,16 +19,22 @@ data = pd.DataFrame(list(collec.find()))
 features = ["verified", "friend_nb", "listed_nb", "follower_nb", 
             "favorites_nb",
             "tweet_nb","hash_avg","at_avg","tweet_user_count",
-            'tweet_frequency', 'friend_frequency', 'visibility','Aggressivity'            ]
+            'tweet_frequency', 'friend_frequency',"visibility","Aggressivity"]
 X = data[features]
 Y = data[["label"]]
 
 #normalize data
 from sklearn.preprocessing import StandardScaler
-scaler = StandardScaler()
+from sklearn.preprocessing import MinMaxScaler
+#scaler = StandardScaler()
+scaler = MinMaxScaler()
 scaler.set_output(transform="pandas")
 X_sc = scaler.fit_transform(X)
 
+#remove Vp & Ap from training
+X_plot = X_sc[["visibility","Aggressivity"]].copy()
+X_sc = X_sc.drop(["visibility","Aggressivity"],axis=1)
+#Slice and correct label
 X_train = X_sc[Y.label!=1]
 Y_train = Y[Y.label !=1]
 Y_train[Y_train.label == 2] = 1
@@ -40,9 +46,9 @@ X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.
 
 """ Import librairies """
 from tensorflow import keras
-from tensorflow.keras import layers
+from tensorflow.keras import layers # type: ignore
 
-
+"""Complex model
 model = keras.Sequential([
     layers.BatchNormalization(input_shape=[len(features)]),
     #Next layer
@@ -54,6 +60,17 @@ model = keras.Sequential([
     #Output layer
     layers.Dense(1,activation= 'sigmoid')
 ])
+"""
+
+model = keras.Sequential([
+    layers.BatchNormalization(input_shape=[len(features)-2]),
+    #Next layer
+    layers.Dense(units=10, activation='relu'),
+    layers.BatchNormalization(),
+    #Output layer
+    layers.Dense(1,activation= 'sigmoid')
+])
+
 model.summary()
 
 model.compile(
@@ -61,18 +78,27 @@ model.compile(
     loss='binary_crossentropy',
     metrics=['binary_accuracy'],
 )
+early_stopping = keras.callbacks.EarlyStopping(
+    min_delta=0.001, # minimium amount of change to count as an improvement
+    patience=5, # how many epochs to wait before stopping
+    restore_best_weights=True,
+)
 
 history = model.fit(
     X_train, Y_train,
+    validation_data=(X_test, Y_test),
     batch_size=256,
-    epochs=200, 
-    verbose = 0
+    epochs=500, 
+    verbose = 1,
+    callbacks=[early_stopping]
 )
 
 
 history_df = pd.DataFrame(history.history)
-history_df.loc[5:, ['loss', 'binary_accuracy']].plot()
-
+history_df.loc[:, ['loss', 'val_loss']].plot()
+plt.show()
+history_df.loc[:, ['binary_accuracy', 'val_binary_accuracy']].plot()
+plt.show()
 
 
 X_sc["predict"] = model.predict(X_sc)
@@ -82,8 +108,8 @@ def fun(x):
 X_sc["new_label"] = X_sc["predict"].apply(fun)
 
 
-plt.scatter(X_sc.visibility[X_sc["new_label"]==0],X_sc.Aggressivity[X_sc["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X_sc.visibility[X_sc["new_label"]==1],X_sc.Aggressivity[X_sc["new_label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(X_plot.visibility[X_sc["new_label"]==0],X_plot.Aggressivity[X_sc["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
+plt.scatter(X_plot.visibility[X_sc["new_label"]==1],X_plot.Aggressivity[X_sc["new_label"]==1],s=0.5,c="red",label = "suspicious")
 
 plt.legend()
 plt.xlabel("visibility")

@@ -29,7 +29,6 @@ X.sort_values("total",inplace=True)
 X["label"] = 1
 X.iloc[:10000,3]=0
 X.iloc[-10000:,3]=2
-X[data.index]
 
 #Put the index back in the data field
 X.sort_index(inplace=True,ascending=True)
