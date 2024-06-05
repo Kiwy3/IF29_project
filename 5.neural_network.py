@@ -40,7 +40,7 @@ Y_train = Y[Y.label !=1]
 Y_train[Y_train.label == 2] = 1
 #Split data
 from sklearn.model_selection import train_test_split
-X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.33)
+X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.3)
 
 """Create and train the neural network"""
 
@@ -48,13 +48,16 @@ X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.
 from tensorflow import keras
 from tensorflow.keras import layers # type: ignore
 
-"""Complex model
+"""#Complex model
 model = keras.Sequential([
-    layers.BatchNormalization(input_shape=[len(features)]),
+    layers.BatchNormalization(input_shape=[len(features)-2]),
     #Next layer
     layers.Dense(units=256, activation='relu'),
     layers.BatchNormalization(),
     #Next layer
+    layers.Dense(units=256, activation='relu'),
+    layers.BatchNormalization(),
+    #Output layer
     layers.Dense(units=256, activation='relu'),
     layers.BatchNormalization(),
     #Output layer
@@ -63,10 +66,7 @@ model = keras.Sequential([
 """
 
 model = keras.Sequential([
-    layers.BatchNormalization(input_shape=[len(features)-2]),
-    #Next layer
-    layers.Dense(units=10, activation='relu'),
-    layers.BatchNormalization(),
+    layers.Dense(units=1, activation='relu',input_shape=[len(features)-2]),
     #Output layer
     layers.Dense(1,activation= 'sigmoid')
 ])
@@ -74,7 +74,7 @@ model = keras.Sequential([
 model.summary()
 
 model.compile(
-    optimizer='adam',
+    optimizer='SGD',
     loss='binary_crossentropy',
     metrics=['binary_accuracy'],
 )
@@ -89,8 +89,8 @@ history = model.fit(
     validation_data=(X_test, Y_test),
     batch_size=256,
     epochs=500, 
-    verbose = 1,
-    callbacks=[early_stopping]
+    verbose = 1
+    ,callbacks=[early_stopping]
 )
 
 
@@ -101,7 +101,7 @@ history_df.loc[:, ['binary_accuracy', 'val_binary_accuracy']].plot()
 plt.show()
 
 
-X_sc["predict"] = model.predict(X_sc)
+#X_sc["predict"] = model.predict(X_sc)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
