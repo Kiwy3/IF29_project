@@ -1,0 +1,6 @@
+TO DO IF29 : 
+
+ - url_bool est bugué, 100% de faux (ou inutile)
+ - retweet avg est null pour chaque user
+
+ max date : 01/01/2019
