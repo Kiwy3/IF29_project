@@ -15,8 +15,8 @@ collec = db.user_db_V1 #whole database
 #collec = db.user_db_sample #small db with 100 tweets
 data = pd.DataFrame(list(collec.find()))
 max_date = data.created_date.max()
-data["diff"] = data.created_date.apply(lambda x : (x - max_date).seconds)
-
+#data["diff"] = data.created_date.apply(lambda x : (x - max_date).seconds)
+data["diff"] = data.created_date.apply(lambda x: (x - max_date).seconds if x is not None else 0)
 
 #choose feature
 features = ["verified", "friend_nb", "listed_nb", "follower_nb", "favorites_nb","url_bool","len_description","tweet_nb","hash_avg","at_avg","tweet_user_count","diff"]
@@ -57,5 +57,6 @@ ax.scatter(data[data.labels == 1].PCA_1, data[data.labels == 1].PCA_2, data[data
 plt.show()
 
 #Export
+db.create_collection("user_kmeans_pca")
 db.user_kmeans_pca.drop()
 db.user_kmeans_pca.insert_many(data.to_dict('records'))

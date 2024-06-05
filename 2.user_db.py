@@ -13,7 +13,7 @@ from datetime import datetime
 #Connection with mongoDB
 client = MongoClient("localhost", 27017)
 db = client["IF29"]
-collec = db.tweets_global
+collec = db.Raw
 
 #define the comparaison date
 max_date = datetime(2018, 7, 1)
@@ -21,7 +21,7 @@ max_date = datetime(2018, 7, 1)
 #Make the aggregation pipeline
 pipeline = [
     {"$sort":{"current_time":1}}, #to allow $last to effectively be the last
-    {"$limit": 100}, #if we need to test it on few lines
+    #{"$limit": 100}, #if we need to test it on few lines
      
     #Add nb of # and @ on each tweet
     {"$addFields":{"hash_count" : {"$subtract": [{"$size" : {"$split" : ["$text","#"]} },1 ]  }},  },
@@ -31,6 +31,13 @@ pipeline = [
     #{"$addFields":{"tweet_len_description" : { "$cond" : [{"$eq" : ["$user.description","null"]},{"$strLenBytes" : "$user.description"},0 ]}},  },
     #mange user.created_at date fields
     {"$addFields":{"user_date" : {"$dateFromString":{"dateString" : "$user.created_at"}}  }},
+    {"$addFields":{"len_description": {
+            "$cond": {
+                "if": {"$gt": [{"$strLenCP": {"$ifNull": ["$user.description", ""]}}, 0]},
+                "then": {"$strLenCP": "$user.description"},
+                "else": 0
+            }
+        }  }},
     #group by user 
     {"$group":{ #user global information
                "_id":"$user.id",
@@ -45,6 +52,7 @@ pipeline = [
                #Text Fields
                "url_bool" : {"$max" :"$tweet_url_bool" },
                "description" : {"$last" : "$user.description"},
+               "len_description": {"$avg": "$len_description"},
                #tweet stats
                "tweet_nb" : {"$sum":1},
                "hash_avg" : {"$avg" : "$hash_count"},
@@ -63,7 +71,7 @@ pipeline = [
     {"$addFields" : {"Aggressivity" : {"$add" : ["$at_avg","$hash_avg"] }}},
     #Export it on another database
      #,{"$out" : "user_db_sample"} #Sample database for small test
-    {"$out" : "user_db_sample"}
+    {"$out" : "user_db_V1"}
 ]
 
 st = time.localtime() #to collect the time of start
