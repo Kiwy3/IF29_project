@@ -48,60 +48,89 @@ X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.
 from tensorflow import keras
 from tensorflow.keras import layers # type: ignore
 
-"""#Complex model
-model = keras.Sequential([
-    layers.BatchNormalization(input_shape=[len(features)-2]),
-    #Next layer
-    layers.Dense(units=256, activation='relu'),
-    layers.BatchNormalization(),
-    #Next layer
-    layers.Dense(units=256, activation='relu'),
-    layers.BatchNormalization(),
-    #Output layer
-    layers.Dense(units=256, activation='relu'),
-    layers.BatchNormalization(),
-    #Output layer
-    layers.Dense(1,activation= 'sigmoid')
-])
-"""
 
-model = keras.Sequential([
-    layers.Dense(units=1, activation='relu',input_shape=[len(features)-2]),
-    #Output layer
-    layers.Dense(1,activation= 'sigmoid')
-])
+"""----------------Create the IF29_01 model ----------------"""
+def model_01():
+    model = keras.Sequential([
+        layers.Input(shape = (11,),name = "input"),
+        layers.Dense(units=1, activation='relu',name="dense_layer"),
+        #Output layer
+        layers.Dense(1,activation= 'sigmoid',name = "output")
+    ])
+    model._name = "IF29_01"
+    return model
 
+"""----------------Create the IF29_02 model ----------------"""
+def model_02():
+    model = keras.Sequential([
+        layers.Input(shape = (11,),name = "input"),
+        layers.Dense(units=10, activation='relu',name="dense_layer_1"),
+        layers.Dense(units=10, activation='relu',name="dense_layer_2"),
+        #Output layer
+        layers.Dense(1,activation= 'sigmoid',name = "output")
+    ])
+    model._name = "IF29_02"
+    return model
+
+"""----------------Create the IF29_03 model ----------------"""
+def model_03():
+    model = keras.Sequential([
+        layers.Input(shape = (11,),name = "input"),
+        layers.BatchNormalization(),
+        layers.Dense(units=10, activation='relu',name="dense_layer_1"),
+        layers.BatchNormalization(),
+        layers.Dense(units=10, activation='relu',name="dense_layer_2"),
+        layers.BatchNormalization(),
+        #Output layer
+        layers.Dense(1,activation= 'sigmoid',name = "output")
+    ])
+    model._name = "IF29_02"
+    return model
+
+#choose model and show it
+model = model_02()
 model.summary()
 
+#Compile to define the training of the model
 model.compile(
-    optimizer='SGD',
+    optimizer='adam',
     loss='binary_crossentropy',
     metrics=['binary_accuracy'],
 )
+
+#Define early stopping
 early_stopping = keras.callbacks.EarlyStopping(
     min_delta=0.001, # minimium amount of change to count as an improvement
     patience=5, # how many epochs to wait before stopping
     restore_best_weights=True,
 )
 
+#Train the model
 history = model.fit(
     X_train, Y_train,
     validation_data=(X_test, Y_test),
     batch_size=256,
-    epochs=500, 
+    epochs=300, 
     verbose = 1
     ,callbacks=[early_stopping]
 )
 
-
+"""Plot evolution of the training"""
 history_df = pd.DataFrame(history.history)
-history_df.loc[:, ['loss', 'val_loss']].plot()
-plt.show()
-history_df.loc[:, ['binary_accuracy', 'val_binary_accuracy']].plot()
-plt.show()
+def history_plot():
+    fig, ax = plt.subplots(2)
+    fig.suptitle("Evolution des indicateurs au cours de l'apprentissage")
+    ax[0].plot(history_df.loc[:, ['loss', 'val_loss']],label = ['loss', 'val_loss'])
+    ax[0].legend()
+    ax[0].set(ylabel = "Loss")
+    ax[1].plot(history_df.loc[:, ['binary_accuracy', 'val_binary_accuracy']],label =['binary_accuracy', 'val_binary_accuracy'] )
+    ax[1].legend()
+    ax[1].set(xlabel = "epochs",ylabel = "Entropy for binary accuracy")
+    plt.show()
+history_plot()
 
 
-#X_sc["predict"] = model.predict(X_sc)
+X_sc["predict"] = model.predict(X_sc)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
@@ -115,4 +144,3 @@ plt.legend()
 plt.xlabel("visibility")
 plt.ylabel("aggressivity")
 plt.show()
-
