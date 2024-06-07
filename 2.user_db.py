@@ -21,7 +21,7 @@ max_date = datetime(2018, 7, 1)
 #Make the aggregation pipeline
 pipeline = [
     {"$sort":{"current_time":1}}, #to allow $last to effectively be the last
-    {"$limit": 100}, #if we need to test it on few lines
+    #{"$limit": 100}, #if we need to test it on few lines
      
     #Add nb of # and @ on each tweet
     {"$addFields":{"hash_count" : {"$subtract": [{"$size" : {"$split" : ["$text","#"]} },1 ]  }},  },
@@ -63,7 +63,7 @@ pipeline = [
     {"$addFields" : {"Aggressivity" : {"$add" : ["$at_avg","$hash_avg"] }}},
     #Export it on another database
      #,{"$out" : "user_db_sample"} #Sample database for small test
-    {"$out" : "user_db_sample"}
+    {"$out" : "user_db_V2"}
 ]
 
 st = time.localtime() #to collect the time of start
