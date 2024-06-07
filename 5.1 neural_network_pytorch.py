@@ -44,14 +44,21 @@ X_sc_removed = X_sc.drop(["visibility", "Aggressivity"], axis=1)
 
 # Slice and correct label
 X_train = X_sc_removed[Y_encoded != 1]
-Y_train = Y_encoded[Y_encoded != 1]
+Y_train = Y[Y_encoded != 1]
 
 # Remap labels 2 to 1
-Y_train = np.where(Y_train == 2, 1, Y_train)
+Y_train[Y_train == 2] = 1
 
 # Select a subset for training if needed
-Y_train = Y_train[:20000]
-X_train = X_train.iloc[:20000]
+Y_train = Y_train[:50000]
+X_train = X_train.iloc[:50000]
+
+# Compter le nombre d'instances pour chaque label dans l'échantillon d'entraînement
+label_counts_train = Y_train.value_counts()
+
+# Afficher le nombre d'individus labellisés 1 et 0 dans l'échantillon d'entraînement
+print("Nombre d'individus labellisés 1 dans l'échantillon d'entraînement :", label_counts_train[1])
+print("Nombre d'individus labellisés 0 dans l'échantillon d'entraînement :", label_counts_train[0])
 
 # Check for the number of instances of class 2 (now class 1)
 num_twos = (Y_train == 1).sum()
@@ -63,8 +70,8 @@ X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size=
 # Convert data to PyTorch tensors
 X_train = torch.FloatTensor(X_train.values)
 x_test = torch.FloatTensor(X_test.values)
-Y_train = torch.LongTensor(Y_train).squeeze()
-y_test = torch.LongTensor(Y_test).squeeze()
+Y_train = torch.LongTensor(Y_train.values)
+y_test = torch.LongTensor(Y_test.values)
 
 # Verify the unique values in labels to ensure they are in the correct range
 print(f"Unique labels in Y_train: {torch.unique(Y_train)}")
@@ -134,7 +141,7 @@ def train_model(X_train, Y_train, x_test, y_test, model, criterion, optimizer, n
 
 # Define model parameters
 input_size = X_train.shape[1]
-hidden_sizes = [45, 20, 10]
+hidden_sizes = [8, 3]
 output_classes = 2 
 model = Model(input_size, hidden_sizes, output_classes)
 
@@ -143,8 +150,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
 # Train the model
-n_epochs = 30
-batch_size = 64
+n_epochs = 5
+batch_size = 8
 losses, accuracies_train, accuracies_test = train_model(X_train, Y_train, x_test, y_test, model, criterion, optimizer, n_epochs, batch_size)
 
 # Plot loss and accuracies
@@ -156,23 +163,46 @@ plt.xlabel("Epoch")
 plt.legend()
 plt.show()
 
+# Charger les données de user_db_V1 depuis la base de données MongoDB
+collec_v1 = db.user_db_V1
+data_v1 = pd.DataFrame(list(collec_v1.find()))
 
-# Visualize the classification results
-def plot_classification_results(X_plot, predictions):
-    plt.figure(figsize=(10, 6))
-    scatter = plt.scatter(X_plot['visibility'], X_plot['Aggressivity'], c=predictions, cmap='viridis', alpha=0.5)
-    plt.colorbar(scatter, ticks=[0, 1])
-    plt.xlabel('Visibility')
-    plt.ylabel('Aggressivity')
-    plt.title('Classification Results')
-    plt.show()
+# Assurez-vous que les noms des caractéristiques correspondent
+X_v1 = data_v1[features]
 
-# Get predictions for the entire dataset
+# Réappliquer le scaler avec les mêmes paramètres qu'il avait lors de l'entraînement
+X_v1_sc = scaler.fit_transform(X_v1)
+
+# Convertir les données en un DataFrame Pandas
+X_v1_sc_df = pd.DataFrame(X_v1_sc, columns=X_v1.columns)
+
+# Supprimer les colonnes "visibility" et "Aggressivity"
+X_v1_removed = X_v1_sc_df.drop(["visibility", "Aggressivity"], axis=1)
+
+# Passer les données transformées dans le modèle entraîné pour obtenir les prédictions
+X_v1_tensor = torch.FloatTensor(X_v1_removed.values)
+print("Shape of X_v1_tensor:", X_v1_tensor.shape)
+
+
+# Passer les données transformées dans le modèle entraîné pour obtenir les prédictions
 model.eval()
-X_full = torch.FloatTensor(X_sc_removed.values)
 with torch.no_grad():
-    outputs = model(X_full)
-    _, predictions = torch.max(outputs, 1)
+    predictions = model(X_v1_tensor)
+    _, predicted_labels = torch.max(predictions, 1)
 
-# Plot the classification results
-plot_classification_results(X_plot, predictions.numpy())
+
+plt.figure(figsize=(10, 6))
+plt.scatter(X_v1_sc_df['visibility'], X_v1_sc_df['Aggressivity'], c=predicted_labels, cmap='viridis', alpha=0.5)
+plt.colorbar(ticks=[0, 1])
+plt.xlabel('Visibility')
+plt.ylabel('Aggressivity')
+plt.title('Classification Results')
+plt.show()
+
+# Compter le nombre d'instances pour chaque label prédit
+label_counts = pd.Series(predicted_labels.numpy()).value_counts()
+
+# Afficher le nombre de données labellisées pour chaque label prédit
+print("Nombre de données labellisées pour chaque label prédit :")
+print(label_counts)
+
