@@ -32,7 +32,7 @@ X["_id"] = data["_id"]
 
 #Export the collection to mongo
 db.user_db_norm.drop()
-db.user_db_norm.insert_many(data.to_dict('records'))
+db.user_db_norm.insert_many(X.to_dict('records'))
 
 #close the mongodb connection
 client.close()
