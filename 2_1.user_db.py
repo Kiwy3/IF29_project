@@ -21,7 +21,7 @@ max_date = datetime(2018, 7, 18) #one day after last tweet
 #Make the aggregation pipeline
 pipeline = [
     #{"$sort":{"current_time":1}}, #to allow $last to effectively be the last
-    {"$limit": 50}, #if we need to test it on few lines
+    #{"$limit": 50}, #if we need to test it on few lines
     {"$addFields":{"tweet_len_description" : { "$strLenCP": {"$ifNull" : ["$user.description",""] }}}},
 
     #Count specific caracter inside the text of a tweet, using entities attribute
@@ -68,8 +68,8 @@ pipeline = [
     #create a ff_ratio attribute
     {"$addFields" : {"ff_ratio" : {"$divide" : ["$friend_nb","$follower_nb"] }}},
     #Export it on another database
-    {"$out" : "user_db_sample"} #Sample database for small test
-    #{"$out" : "user_db_V2"}
+    #{"$out" : "user_db_sample"} #Sample database for small test
+    {"$out" : "user_db_V2"}
 ]
 
 st = time.localtime() #to collect the time of start
