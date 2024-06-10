@@ -66,7 +66,9 @@ pipeline = [
     #Make the visibility attribute
     {"$addFields" : {"visibility" : {"$add" : ["$mention_avg","$hash_avg","$url_avg","$symbols_avg"] }}},
     #create a ff_ratio attribute
-    {"$addFields" : {"ff_ratio" : {"$divide" : ["$friend_nb","$follower_nb"] }}},
+    {"$addFields" : {"ff_ratio" : {"$cond" : { "if" : { "$eq": [ "$follower_nb", 0 ] },"then" : "$friend_nb","else" : {"$divide" : ["$friend_nb","$follower_nb"] }
+    }  }}},
+    #{"$addFields" : {"ff_ratio" : {"$divide" : ["$friend_nb","$follower_nb"] }}},
     #Export it on another database
     #{"$out" : "user_db_sample"} #Sample database for small test
     {"$out" : "user_db_V2"}
