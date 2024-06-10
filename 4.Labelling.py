@@ -7,27 +7,24 @@ author : Nathan Davouse
 """
 
 
-#connect from Mongo DB and import it on pandas
+#Import librairies
 from pymongo import MongoClient
 import pandas as pd
+import numpy as np
+
+#connect from Mongo DB and import it on pandas
 client = MongoClient("localhost", 27017)
 db = client["IF29"]
-collec = db.user_db_V2 #whole database
-#collec = db.user_db_sample #small db with 100 tweets
+collec = db.user_db_norm #whole database
 data = pd.DataFrame(list(collec.find()))
 
-#Scale the features
-features = ["visibility","Aggressivity"]
-from sklearn.preprocessing import MinMaxScaler
-scaler = MinMaxScaler()
-scaler.set_output(transform="pandas")
-X = scaler.fit_transform(data[features])
+#Define higher & lower bound of aggressivity and visibility
+low_visi = np.percentile(data.visibility , 25)
+high_visi = np.percentile(data.visibility , 85)
+low_agr = np.percentile(data.aggressivity , 25)
+high_agr = np.percentile(data.aggressivity , 85)
 
-low_visi = X.visibility.describe()["25%"]
-high_visi = X.visibility.describe()["75%"]
-low_agr = X.Aggressivity.describe()["25%"]
-high_agr = X.Aggressivity.describe()["75%"]
-
+#functions to split 3 classes of visibility and aggressivity
 def split_aggr(x):
     if x<low_agr:
         return -1
@@ -41,34 +38,32 @@ def split_visi(x):
     elif x> high_visi:
         return 1
     else  : return 0
-
-X["classes"] = X.visibility.apply(split_visi)*X.Aggressivity.apply(split_visi)
+# Split the data in 3
+data["classes"] = np.round(0.5*(data.visibility.apply(split_visi)+data.aggressivity.apply(split_aggr)))
 
 #pick sample
 import random
 random.seed(10) #for reproductibility
-high_indexes = random.sample(list(X[X["classes"]==1].index),10000)
-low_indexes = random.sample(list(X[X["classes"]==-1].index),10000)
+high_indexes = random.sample(list(data[data["classes"]==1].index),10000)
+low_indexes = random.sample(list(data[data["classes"]==-1].index),10000)
 #Give label to data
-X["label"] = 0
-X.loc[high_indexes,"label"] = 1
-X.loc[low_indexes,"label"] = -1
-
-data["label"] = X["label"]
+data["label"] = 0
+data.loc[high_indexes,"label"] = 1
+data.loc[low_indexes,"label"] = -1
 
 #Export the collection to mongo
-#db.user_label.drop()
-#db.user_label.insert_many(data.to_dict('records'))
+db.user_label.drop()
+db.user_label.insert_many(data.drop("classes",axis=1).to_dict('records'))
 
 #Plot 
 import matplotlib.pyplot as plt
-plt.scatter(X.visibility[X["label"]==-1],X.Aggressivity[X["label"]==-1],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X.visibility[X["label"]==0],X.Aggressivity[X["label"]==0],s=0.5,c="grey",label = "undefined")
-plt.scatter(X.visibility[X["label"]==1],X.Aggressivity[X["label"]==1],s=0.5,c="red",label = "suspicious")
-plt.scatter(X.visibility[X["classes"]==0],X.Aggressivity[X["classes"]==0],s=0.5,c="black",label = "undefined")
-
+plt.scatter(data.visibility[data["label"]==0],data.aggressivity[data["label"]==0],s=0.5,c="grey",label = "undefined_final")
+plt.scatter(data.visibility[data["label"]==1],data.aggressivity[data["label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(data.visibility[data["classes"]==0],data.aggressivity[data["classes"]==0],s=0.5,c="black",label = "undefined_temp")
+plt.scatter(data.visibility[data["label"]==-1],data.aggressivity[data["label"]==-1],s=0.5,c="blue",label = "non suspicious")
 
 plt.legend()
 plt.xlabel("visibility")
 plt.ylabel("aggressivity")
 plt.show()
+
