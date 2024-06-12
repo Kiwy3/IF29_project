@@ -16,33 +16,23 @@ collec = db.user_label #whole database
 data = pd.DataFrame(list(collec.find()))
 
 #Normalize data
-features = ["verified", "friend_nb", "listed_nb", "follower_nb", 
-            "favorites_nb",
-            "tweet_nb","hash_avg","at_avg","tweet_user_count",
-            'tweet_frequency', 'friend_frequency',"visibility","Aggressivity"]
+features = ['verified', 'protected', 'friend_nb',
+        'listed_nb', 'follower_nb', 'favorites_nb', 'len_description',
+        'hash_avg', 'mention_avg', 'url_avg', 'symbols_avg', 'tweet_nb',
+        'tweet_user_count', 'user_lifetime', 'tweet_frequency',
+        'friend_frequency', 'aggressivity', 'visibility', 'ff_ratio']
 X = data[features]
 Y = data[["label"]]
 
-#normalize data
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MinMaxScaler
-#scaler = StandardScaler()
-scaler = MinMaxScaler()
-scaler.set_output(transform="pandas")
-X_sc = scaler.fit_transform(X)
-
-#remove Vp & Ap from training
-X_plot = X_sc[["visibility","Aggressivity"]].copy()
-X_sc = X_sc.drop(["visibility","Aggressivity"],axis=1)
 #Slice and correct label
-X_train = X_sc[Y.label!=1]
-Y_train = Y[Y.label !=1]
-Y_train[Y_train.label == 2] = 1
+X_train = X[Y.label!=0]
+X_pred = X[Y.label == 0]
+Y_train = Y[Y.label !=0]
+Y_train[Y_train.label == -1] = 0
 #Split data
 from sklearn.model_selection import train_test_split
-X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.3)
-
-"""Create and train the neural network"""
+X_train, X_test, Y_train, Y_test = train_test_split(X_train,Y_train,test_size=0.3,random_state=165464,shuffle=True)
+X_train, X_val, Y_train,Y_val = train_test_split(X_train,Y_train,test_size=0.28,random_state=165464,shuffle=True)
 
 """ Import librairies """
 from tensorflow import keras
@@ -63,7 +53,7 @@ def model_01():
 """----------------Create the IF29_02 model ----------------"""
 def model_02():
     model = keras.Sequential([
-        layers.Input(shape = (11,),name = "input"),
+        layers.Input(shape = (len(features),),name = "input"),
         layers.Dense(units=10, activation='relu',name="dense_layer_1"),
         layers.Dense(units=10, activation='relu',name="dense_layer_2"),
         #Output layer
@@ -102,7 +92,7 @@ def model_031():
     return model
 
 #choose model and show it
-model = model_031()
+model = model_02()
 model.summary()
 
 #Compile to define the training of the model
@@ -144,15 +134,15 @@ def history_plot():
 history_plot()
 
 
-X_sc["predict"] = model.predict(X_sc)
+X_pred["predict"] = model.predict(X_pred)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
-X_sc["new_label"] = X_sc["predict"].apply(fun)
+X_pred["new_label"] = X_pred["predict"].apply(fun)
 
 
-plt.scatter(X_plot.visibility[X_sc["new_label"]==0],X_plot.Aggressivity[X_sc["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X_plot.visibility[X_sc["new_label"]==1],X_plot.Aggressivity[X_sc["new_label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(X_pred.visibility[X_pred["new_label"]==0],X_pred.aggressivity[X_pred["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
+plt.scatter(X_pred.visibility[X_pred["new_label"]==1],X_pred.aggressivity[X_pred["new_label"]==1],s=0.5,c="red",label = "suspicious")
 
 plt.legend()
 plt.xlabel("visibility")

@@ -57,9 +57,9 @@ db.user_label.insert_many(data.drop("classes",axis=1).to_dict('records'))
 
 #Plot 
 import matplotlib.pyplot as plt
-plt.scatter(data.visibility[data["label"]==0],data.aggressivity[data["label"]==0],s=0.5,c="grey",label = "undefined_final")
+#plt.scatter(data.visibility[data["label"]==0],data.aggressivity[data["label"]==0],s=0.5,c="grey",label = "undefined_final")
 plt.scatter(data.visibility[data["label"]==1],data.aggressivity[data["label"]==1],s=0.5,c="red",label = "suspicious")
-plt.scatter(data.visibility[data["classes"]==0],data.aggressivity[data["classes"]==0],s=0.5,c="black",label = "undefined_temp")
+#plt.scatter(data.visibility[data["classes"]==0],data.aggressivity[data["classes"]==0],s=0.5,c="black",label = "undefined_temp")
 plt.scatter(data.visibility[data["label"]==-1],data.aggressivity[data["label"]==-1],s=0.5,c="blue",label = "non suspicious")
 
 plt.legend()
