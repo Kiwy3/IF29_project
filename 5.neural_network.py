@@ -134,7 +134,7 @@ def history_plot():
 history_plot()
 
 
-X_pred["predict"] = model.predict(X_pred)
+X["predict"] = model.predict(X)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
