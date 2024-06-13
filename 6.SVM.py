@@ -13,23 +13,11 @@ collec = db.user_label
 data = pd.DataFrame(list(collec.find()))
 
 # Define features and target variable
-data_removed = data[data["label"] != 1]
+data_removed = data[data["label"] != 0]
 
 # Define features and target variable
 features = [
-    "verified",
-    "friend_nb",
-    "listed_nb",
-    "follower_nb",
-    "favorites_nb",
-    "tweet_nb",
-    "hash_avg",
-    "at_avg",
-    "tweet_user_count",
-    "tweet_frequency",
-    "friend_frequency",
-    "visibility",
-    "Aggressivity",
+    "verified","protected","friend_nb","listed_nb","follower_nb","favorites_nb","len_description","hash_avg","mention_avg","url_avg","symbols_avg","tweet_nb","tweet_user_count","user_lifetime","tweet_frequency","friend_frequency","aggressivity","visibility","ff_ratio"
 ]
 X = data_removed[features]
 y = data_removed["label"]

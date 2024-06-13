@@ -8,7 +8,7 @@ from pymongo import MongoClient
 # Connexion à MongoDB et chargement des données
 client = MongoClient("localhost", 27017)
 db = client["IF29"]
-collec = db.user_db_V1
+collec = db.user_db
 data = pd.DataFrame(list(collec.find()))
 
 data = data.sample(frac=0.002)
@@ -16,13 +16,12 @@ print(data.shape)
 
 # Mise à l'échelle des données
 scaler = StandardScaler()
-data_scaled = scaler.fit_transform(data[['Aggressivity', 'visibility']])
+data_scaled = scaler.fit_transform(data[['aggressivity', 'visibility']])
 
 # Application de DBSCAN
 # Apply DBSCAN
 dbscan = DBSCAN(eps=0.5, min_samples=200)  # You may need to tune the parameters
 labels = dbscan.fit_predict(data_scaled)
-labels[labels == -1] = 2
 data['label'] = labels
 
 # Imprimer le nombre d'individus pour chaque label dans les données équilibrées
