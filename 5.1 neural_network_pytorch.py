@@ -22,16 +22,17 @@ collec = db.user_label
 data = pd.DataFrame(list(collec.find()))
 
 # Features and labels
-features = ["verified", "friend_nb", "listed_nb", "follower_nb", 
-            "favorites_nb", "len_description", "tweet_nb", "hash_avg", 
-            "at_avg", "tweet_user_count", "tweet_frequency", 
-            "friend_frequency", "visibility", "Aggressivity"]
+features = ['verified', 'protected', 'friend_nb',
+        'listed_nb', 'follower_nb', 'favorites_nb', 'len_description',
+        'hash_avg', 'mention_avg', 'url_avg', 'symbols_avg', 'tweet_nb',
+        'tweet_user_count', 'user_lifetime', 'tweet_frequency',
+        'friend_frequency', 'aggressivity', 'visibility', 'ff_ratio']
 X = data[features]
 Y = data["label"]
 
 # Encode the labels to be in the range [0, num_classes-1]
-label_encoder = LabelEncoder()
-Y_encoded = label_encoder.fit_transform(Y)
+#label_encoder = LabelEncoder()
+#Y_encoded = label_encoder.fit_transform(Y)
 
 # Normalize data
 scaler = MinMaxScaler()
@@ -39,15 +40,15 @@ scaler.set_output(transform="pandas")
 X_sc = scaler.fit_transform(X)
 
 # Remove visibility & aggressivity from training
-X_plot = X_sc[["visibility", "Aggressivity"]].copy()
-X_sc_removed = X_sc.drop(["visibility", "Aggressivity"], axis=1)
+X_plot = X_sc[["visibility", "aggressivity"]].copy()
+X_sc_removed = X_sc.drop(["visibility", "aggressivity"], axis=1)
 
 # Slice and correct label
-X_train = X_sc_removed[Y_encoded != 1]
-Y_train = Y[Y_encoded != 1]
+X_train = X_sc_removed[Y != 0]
+Y_train = Y[Y != 0]
 
 # Remap labels 2 to 1
-Y_train[Y_train == 2] = 1
+Y_train[Y_train == -1] = 0
 
 # Select a subset for training if needed
 Y_train = Y_train[:50000]
@@ -150,8 +151,8 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
 # Train the model
-n_epochs = 5
-batch_size = 8
+n_epochs = 20
+batch_size = 256
 losses, accuracies_train, accuracies_test = train_model(X_train, Y_train, x_test, y_test, model, criterion, optimizer, n_epochs, batch_size)
 
 # Plot loss and accuracies
@@ -164,7 +165,7 @@ plt.legend()
 plt.show()
 
 # Charger les données de user_db_V1 depuis la base de données MongoDB
-collec_v1 = db.user_db_V1
+collec_v1 = db.user_db
 data_v1 = pd.DataFrame(list(collec_v1.find()))
 
 # Assurez-vous que les noms des caractéristiques correspondent
@@ -177,7 +178,7 @@ X_v1_sc = scaler.fit_transform(X_v1)
 X_v1_sc_df = pd.DataFrame(X_v1_sc, columns=X_v1.columns)
 
 # Supprimer les colonnes "visibility" et "Aggressivity"
-X_v1_removed = X_v1_sc_df.drop(["visibility", "Aggressivity"], axis=1)
+X_v1_removed = X_v1_sc_df.drop(["visibility", "aggressivity"], axis=1)
 
 # Passer les données transformées dans le modèle entraîné pour obtenir les prédictions
 X_v1_tensor = torch.FloatTensor(X_v1_removed.values)
@@ -192,7 +193,7 @@ with torch.no_grad():
 
 
 plt.figure(figsize=(10, 6))
-plt.scatter(X_v1_sc_df['visibility'], X_v1_sc_df['Aggressivity'], c=predicted_labels, cmap='viridis', alpha=0.5)
+plt.scatter(X_v1_sc_df['visibility'], X_v1_sc_df['aggressivity'], c=predicted_labels, cmap='viridis', alpha=0.5)
 plt.colorbar(ticks=[0, 1])
 plt.xlabel('Visibility')
 plt.ylabel('Aggressivity')

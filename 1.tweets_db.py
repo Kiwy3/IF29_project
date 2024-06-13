@@ -18,7 +18,7 @@ db = client["IF29"]
 collec = db.tweets_global
 
 #Initialisation
-folder_path = "C:\\Users\\Nathan\\IF29_project\\raw"
+folder_path = "raw"
 total = len(os.listdir(folder_path))
 i=0
 #loop on everyfile of the folder

@@ -5,7 +5,7 @@ from datetime import datetime
 # Connection with mongoDB
 client = MongoClient("localhost", 27017)
 db = client["IF29"]
-collec = db.Raw
+collec = db.tweets_global
 
 # define the comparaison date
 max_date = datetime(2018, 7, 18)  # one day after last tweet
