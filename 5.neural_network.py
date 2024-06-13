@@ -138,11 +138,11 @@ X["predict"] = model.predict(X)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
-X_pred["new_label"] = X_pred["predict"].apply(fun)
+X["new_label"] = X["predict"].apply(fun)
 
 
-plt.scatter(X_pred.visibility[X_pred["new_label"]==0],X_pred.aggressivity[X_pred["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X_pred.visibility[X_pred["new_label"]==1],X_pred.aggressivity[X_pred["new_label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(X.visibility[X["new_label"]==0],X.aggressivity[X["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
+plt.scatter(X.visibility[X["new_label"]==1],X.aggressivity[X["new_label"]==1],s=0.5,c="red",label = "suspicious")
 
 plt.legend()
 plt.xlabel("visibility")
