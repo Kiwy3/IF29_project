@@ -142,7 +142,7 @@ def train_model(X_train, Y_train, x_test, y_test, model, criterion, optimizer, n
 
 # Define model parameters
 input_size = X_train.shape[1]
-hidden_sizes = [8, 3]
+hidden_sizes = [8, 4]
 output_classes = 2 
 model = Model(input_size, hidden_sizes, output_classes)
 
@@ -151,7 +151,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters())
 
 # Train the model
-n_epochs = 20
+n_epochs = 15
 batch_size = 256
 losses, accuracies_train, accuracies_test = train_model(X_train, Y_train, x_test, y_test, model, criterion, optimizer, n_epochs, batch_size)
 
@@ -203,7 +203,10 @@ plt.show()
 # Compter le nombre d'instances pour chaque label prédit
 label_counts = pd.Series(predicted_labels.numpy()).value_counts()
 
-# Afficher le nombre de données labellisées pour chaque label prédit
-print("Nombre de données labellisées pour chaque label prédit :")
-print(label_counts)
+# Ajouter les labels prédits aux données
+X_v1_sc_df['predicted_label'] = predicted_labels.numpy()
 
+
+# Calculer les statistiques descriptives pour chaque cluster
+cluster_describe = X_v1_sc_df.groupby('predicted_label').describe()
+print(cluster_describe)
