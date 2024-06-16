@@ -210,3 +210,6 @@ X_v1_sc_df['predicted_label'] = predicted_labels.numpy()
 # Calculer les statistiques descriptives pour chaque cluster
 cluster_describe = X_v1_sc_df.groupby('predicted_label').describe()
 print(cluster_describe)
+
+# Enregistrer le DataFrame en fichier CSV
+cluster_describe.to_csv('NN_Pytorch_describe.csv')
