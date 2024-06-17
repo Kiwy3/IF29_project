@@ -18,8 +18,6 @@ id_list = data.pop("_id")
 plotting = True
 cercle = True
 
-
-
 # Calcul des valeurs propres et des vecteurs propres via PCA
 pca = PCA(12)
 pca.set_output(transform="pandas")
@@ -39,16 +37,20 @@ if plotting :
     plt.title('ACP: Projection des deux premières composantes principales')
     plt.xlabel('Première composante principale')
     plt.ylabel('Deuxième composante principale')
+    plt.savefig("./images/3_3.projection_2_composantes.png")
     plt.show()
 
     # Visualisation de la variance expliquée
-    plt.figure(figsize=(10, 7))
-    plt.bar(range(1, len(explained_variance) + 1), explained_variance, alpha=0.5, align='center')
-    plt.step(range(1, len(explained_variance) + 1), explained_variance.cumsum(), where='mid')
-    plt.ylabel('Ratio de variance expliquée')
-    plt.xlabel('Composantes principales')
-    plt.title('Variance expliquée par les composantes principales')
-    plt.savefig("./images/3_3.projection_2_composantes.png")
+    fig,ax1 = plt.subplots()
+    ax1.bar(range(1, len(explained_variance) + 1), explained_variance, alpha=0.5, align='center',label="variance expliquée par la composante")
+    ax2 = ax1.twinx()
+    ax2.step(range(1, len(explained_variance) + 1), explained_variance.cumsum(), where='mid',label = "variance cumulée")
+    ax1.set_ylabel('Ratio de variance expliquée')
+    ax2.set_ylabel("Ratio de variance cumulée")
+    ax1.set_xlabel("Nombre de composantes principales")
+    ax1.vlines(9,0,0.175,colors="red")
+    fig.suptitle('Variance expliquée par les composantes principales')
+    fig.savefig("./images/3_3.pca_variance_cumsum.png")
     plt.show()
 
 if cercle:
