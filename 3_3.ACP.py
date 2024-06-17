@@ -29,7 +29,14 @@ Contribution = pd.DataFrame(pca.components_,columns=data.columns,index=X.columns
 sum_component = np.sum(np.abs(Contribution),axis=1)
 Percent = np.divide(np.abs(Contribution.T),sum_component)*100
 
+#Keep usefuls components and add _id
+n_component = 9 #number of component to keep
+X_save = X.iloc[:,:n_component]
+X_save.insert(0,"_id",id_list)
 
+#Export the collection to mongo
+db.user_db_pca.drop()
+db.user_db_pca.insert_many(X_save.to_dict('records'))
 
 
 
@@ -91,3 +98,7 @@ if cercle:
     plt.rcParams.update({'font.size': 14})
     plt.savefig("./images/3_3.correlation_circle.png")
     plt.show()
+
+
+#close the mongodb connection
+client.close()
