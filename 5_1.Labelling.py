@@ -17,7 +17,6 @@ client = MongoClient("localhost", 27017)
 db = client["IF29"]
 collec = db.user_db_norm #whole database
 data = pd.DataFrame(list(collec.find()))
-id_list = data.pop("_id")
 
 
 #Define higher & lower bound of aggressivity and visibility
