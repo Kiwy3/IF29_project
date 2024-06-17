@@ -133,16 +133,28 @@ def history_plot():
     plt.show()
 history_plot()
 
+def test():
+    fig, ax = plt.subplots(2)
+    fig.suptitle("Sortie du réseaux de neurones")
+    ax[0].scatter(X.visibility[X["new_label"]==0],X.aggressivity[X["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
+    ax[0].scatter(X.visibility[X["new_label"]==1],X.aggressivity[X["new_label"]==1],s=0.5,c="red",label = "suspicious")
+    ax[0].legend()
+    ax[0].set(ylabel = "aggressivity")
+    ax[1].hist(X.predict )
+    ax[1].legend()
+    ax[1].set(xlabel = "probability of being non suspicious",ylabel = "Number of observation")
+    plt.show()
+
 
 X["predict"] = model.predict(X)
 def fun(x):
     if x>0.5 : return 1
     else : return 0
-X_pred["new_label"] = X_pred["predict"].apply(fun)
+X["new_label"] = X["predict"].apply(fun)
 
 
-plt.scatter(X_pred.visibility[X_pred["new_label"]==0],X_pred.aggressivity[X_pred["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X_pred.visibility[X_pred["new_label"]==1],X_pred.aggressivity[X_pred["new_label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(X.visibility[X["new_label"]==0],X.aggressivity[X["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
+plt.scatter(X.visibility[X["new_label"]==1],X.aggressivity[X["new_label"]==1],s=0.5,c="red",label = "suspicious")
 
 plt.legend()
 plt.xlabel("visibility")

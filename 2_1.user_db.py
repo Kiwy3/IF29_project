@@ -38,7 +38,6 @@ pipeline = [
                "created_date" : {"$last":"$user_date"},
                #user boolean
                "verified":{"$max":"$user.verified"},
-               "protected":{"$max":"$user.protected"},
                #user numeric information
                "friend_nb":{"$avg":"$user.friends_count"}, #Follow someone
                "listed_nb":{"$avg":"$user.listed_count"},

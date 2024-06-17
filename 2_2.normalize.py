@@ -8,7 +8,7 @@ author : Nathan Davouse
 #Import librairies
 from pymongo import MongoClient
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 #Connection with mongoDB
 client = MongoClient("localhost", 27017)
@@ -16,7 +16,7 @@ db = client["IF29"]
 collec = db.user_db
 
 data = pd.DataFrame(list(collec.find()))
-features = ['verified', 'protected', 'friend_nb',
+features = ['verified', 'friend_nb',
         'listed_nb', 'follower_nb', 'favorites_nb', 'len_description',
         'hash_avg', 'mention_avg', 'url_avg', 'symbols_avg', 'tweet_nb',
         'tweet_user_count', 'user_lifetime', 'tweet_frequency',
@@ -24,15 +24,15 @@ features = ['verified', 'protected', 'friend_nb',
 
 
 #Scale the features
-scaler = MinMaxScaler()
+scaler = StandardScaler()
 scaler.set_output(transform="pandas")
 X = scaler.fit_transform(data[features])
 
 X["_id"] = data["_id"]
 
 #Export the collection to mongo
-db.user_db_norm.drop()
-db.user_db_norm.insert_many(X.to_dict('records'))
+#db.user_db_norm.drop()
+#db.user_db_norm.insert_many(X.to_dict('records'))
 
 #close the mongodb connection
 client.close()
