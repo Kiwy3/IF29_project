@@ -48,6 +48,7 @@ if plotting :
     plt.ylabel('Ratio de variance expliquée')
     plt.xlabel('Composantes principales')
     plt.title('Variance expliquée par les composantes principales')
+    plt.savefig("./images/3_3.projection_2_composantes.png")
     plt.show()
 
 if cercle:
@@ -73,4 +74,5 @@ if cercle:
     plt.ylabel('axe 2')
     plt.title('Cercle des corrélations')
     plt.rcParams.update({'font.size': 14})
+    plt.savefig("./images/3_3.correlation_circle.png")
     plt.show()
