@@ -15,7 +15,8 @@ data = pd.DataFrame(list(collec.find()))
 id_list = data.pop("_id")
 
 #Variable de controle
-plotting = False
+plotting = True
+cercle = True
 
 
 
@@ -26,7 +27,7 @@ X = pca.fit_transform(data)
 
 #Variance et attributes
 explained_variance = pca.explained_variance_ratio_
-projection = pca.components_
+Contribution = pd.DataFrame(pca.components_,columns=data.columns,index=X.columns)
 
 
 
@@ -47,4 +48,29 @@ if plotting :
     plt.ylabel('Ratio de variance expliquée')
     plt.xlabel('Composantes principales')
     plt.title('Variance expliquée par les composantes principales')
+    plt.show()
+
+if cercle:
+    components = pca.components_.T
+
+    plt.figure(figsize=(10, 10))
+    plt.quiver(np.zeros(components.shape[0]), np.zeros(components.shape[0]), 
+            components[:, 0], components[:, 1], 
+            angles='xy', scale_units='xy', scale=1)
+
+    for i, feature in enumerate(data.columns):
+        plt.text(components[i, 0], components[i, 1], feature, color='blue', ha='center', va='center')
+
+    # Délimiter le cercle unité
+    circle = plt.Circle((0, 0), 1, color='gray', fill=False, linestyle='--')
+    plt.gca().add_artist(circle)
+
+    plt.xlim(-1.1, 1.1)
+    plt.ylim(-1.1, 1.1)
+    plt.axhline(0, color='grey', linestyle='--', lw=1)
+    plt.axvline(0, color='grey', linestyle='--', lw=1)
+    plt.xlabel('axe 1')
+    plt.ylabel('axe 2')
+    plt.title('Cercle des corrélations')
+    plt.rcParams.update({'font.size': 14})
     plt.show()
