@@ -38,8 +38,6 @@ X_save.insert(0,"_id",id_list)
 db.user_db_pca.drop()
 db.user_db_pca.insert_many(X_save.to_dict('records'))
 
-
-
 if plotting :
     # Visualisation des deux premières composantes principales
     plt.figure(figsize=(10, 7))
