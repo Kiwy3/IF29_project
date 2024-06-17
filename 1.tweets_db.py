@@ -7,7 +7,6 @@ author : Nathan Davouse
 """
 
 #Import librairies
-import pymongo
 from pymongo import MongoClient
 import jsonlines
 import os
