@@ -26,6 +26,9 @@ X = pca.fit_transform(data)
 #Variance et attributes
 explained_variance = pca.explained_variance_ratio_
 Contribution = pd.DataFrame(pca.components_,columns=data.columns,index=X.columns)
+sum_component = np.sum(np.abs(Contribution),axis=1)
+Percent = np.divide(np.abs(Contribution.T),sum_component)*100
+
 
 
 
@@ -52,6 +55,16 @@ if plotting :
     fig.suptitle('Variance expliquée par les composantes principales')
     fig.savefig("./images/3_3.pca_variance_cumsum.png")
     plt.show()
+
+    #Participation au 2 premières composantes
+    for n in Percent.columns[:2]:
+        sort_indice = np.argsort(Percent[n])
+        plt.barh(Percent.index[sort_indice],Percent[n][sort_indice])
+        plt.title("Contribution à la composante "+n)
+        plt.xlabel("pourcentage de contribution")
+        plt.tight_layout()
+        plt.savefig("./images/3_3.contribution_"+n+".png")
+        plt.show()
 
 if cercle:
     components = pca.components_.T
