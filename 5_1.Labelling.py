@@ -58,14 +58,34 @@ data.loc[low_indexes,"label"] = -1
 db.user_label.drop()
 db.user_label.insert_many(data.drop("classes",axis=1).to_dict('records'))
 
+#plot aggressivity and visibility hist
+fig,axs = plt.subplots(2)
+fig.suptitle("Distribution de la visibilité \n et de l'aggressivité",x=0.4)
+visi_hist = axs[0].hist(data.visibility,range = (-2,5),bins = 25,density = True)
+higher_bound_visi = max(visi_hist[0])
+axs[0].vlines(low_visi,0,higher_bound_visi,colors="red")
+axs[0].vlines(high_visi,0,higher_bound_visi,colors="red")
+axs[0].set_ylabel("visibilité")
+
+agr_hist = axs[1].hist(data.aggressivity,range = (-1,2),bins = 25,density=True)
+higher_bound_agre = max(agr_hist[0])
+axs[1].vlines(low_agr,0,higher_bound_agre,colors="red",label = "Bornes de \n labellisation")
+axs[1].vlines(high_agr,0,higher_bound_agre,colors="red")
+axs[1].set_ylabel("aggressivité")
+axs[1].set_xlabel("Densité de probabilité dans l'intervalle")
+fig.legend(loc='upper right')
+fig.savefig("./images/5_1.aggr_visi_hist.png")
+plt.show()
+
+
 #Plot 
 import matplotlib.pyplot as plt
 plt.scatter(data.visibility[data["label"]==1],data.aggressivity[data["label"]==1],s=0.5,c="red",label = "suspicious")
 plt.scatter(data.visibility[data["label"]==-1],data.aggressivity[data["label"]==-1],s=0.5,c="blue",label = "non suspicious")
-
 plt.legend()
 plt.xlabel("visibility")
 plt.ylabel("aggressivity")
+plt.title("")
 plt.savefig("./images/5_1.labelling_results.png")
 plt.show()
 
