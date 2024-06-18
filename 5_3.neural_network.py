@@ -80,7 +80,7 @@ def model_02():
 
 """---------------- Choose and train the model ----------------"""
 #Call model and print the summary
-model = model_01()
+model = model_02()
 model.summary()
 #Compile to define the training of the model
 model.compile(
@@ -118,8 +118,14 @@ X["Prediction"] = X["Probability"].apply(fun)
 #Indicators
 X["label"] = Y
 Test_subset = X.loc[X_test.index.tolist()]
-Test_subset[T.label == -1] = 0
+Test_subset[Test_subset.label == -1] = 0
 conf = confusion_matrix(Test_subset.label, Test_subset.Prediction)
+
+#Save the output of the model
+X_save = X
+X_save.insert(0,"_id",id_list)
+db.nn_output.drop()
+db.nn_output.insert_many(X_save.to_dict('records'))
 
 """---------------- Plotting ----------------"""
 #Plotting the history of the training
@@ -157,8 +163,8 @@ fig.savefig("./images/5_3.confusion_matrix_"+model._name+".png")
 plt.show()
 
 #Plot results of the prediction
-plt.scatter(X.pca0[X["new_label"]==0],X.pca1[X["new_label"]==0],s=0.5,c="blue",label = "non suspicious")
-plt.scatter(X.pca0[X["new_label"]==1],X.pca1[X["new_label"]==1],s=0.5,c="red",label = "suspicious")
+plt.scatter(X.pca0[X["Prediction"]==0],X.pca1[X["Prediction"]==0],s=0.5,c="blue",label = "non suspicious")
+plt.scatter(X.pca0[X["Prediction"]==1],X.pca1[X["Prediction"]==1],s=0.5,c="red",label = "suspicious")
 plt.legend()
 plt.xlabel("1ere composante")
 plt.ylabel("2eme composante")
