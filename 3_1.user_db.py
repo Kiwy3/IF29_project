@@ -28,9 +28,8 @@ mention_cost = 10.57
 #Make the aggregation pipeline
 pipeline = [
     #{"$sort":{"current_time":1}}, #to allow $last to effectively be the last
-    {"$limit": 50}, #if we need to test it on few lines
+    #{"$limit": 50}, #if we need to test it on few lines
     {"$addFields":{"tweet_len_description" : { "$strLenCP": {"$ifNull" : ["$user.description",""] }}}},
-
     #Count specific caracter inside the text of a tweet, using entities attribute
     {"$addFields":{"tweet_hashtag_count" : {"$cond": { "if" : {"$isArray" : "$entities.hashtags"},"then" : {"$size":"$entities.hashtags"},"else" : 0}}},  },
     {"$addFields":{"tweet_mention_count" : {"$cond": { "if" : {"$isArray" : "$entities.user_mentions"},"then" : {"$size":"$entities.user_mentions"},"else" : 0}}},  },
