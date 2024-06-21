@@ -16,6 +16,8 @@ db = client["IF29"]
 collec = db.user_db
 
 data = pd.DataFrame(list(collec.find()))
+id_list = data.pop("_id")
+
 features = ['verified', 'friend_nb',
         'listed_nb', 'follower_nb', 'favorites_nb', 'len_description',
         'hash_avg', 'mention_avg', 'url_avg', 'symbols_avg', 'tweet_nb',
@@ -26,9 +28,9 @@ features = ['verified', 'friend_nb',
 #Scale the features
 scaler = StandardScaler()
 scaler.set_output(transform="pandas")
-X = scaler.fit_transform(data[features])
+X = scaler.fit_transform(data)
 
-X["_id"] = data["_id"]
+X["_id"] = id_list
 
 #Export the collection to mongo
 db.user_db_norm.drop()
