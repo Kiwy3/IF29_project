@@ -72,12 +72,10 @@ pipeline = [
     {"$addFields" : {"visi_2" : {"$multiply" : ["$hash_avg",hashtag_cost] }}},
     {"$addFields" : {"visi_3" : {"$multiply" : ["$url_avg",url_cost] }}},
     {"$addFields" : {"visibility" : {"$add" :["$visi_1","$visi_2","$visi_3"]}}},
-    #Make the visibility attribute
-    #{"$addFields" : {"visibility" : {"$add" :["$mention_avg"*mention_cost,"$hash_avg"*hashtag_cost,"$url_avg"*url_cost]}}},
     #create a ff_ratio attribute
     {"$addFields" : {"ff_ratio" : {"$cond" : { "if" : { "$eq": [ "$follower_nb", 0 ] },"then" : "$friend_nb","else" : {"$divide" : ["$friend_nb","$follower_nb"] }
     }  }}},
-    {"$project":{"_id":1,"aggressivity":1,"visibility":1,"verified":1,"friend_nb":1,"listed_nb":1,"follower_nb":1,
+    {"$project":{"_id":1,"aggressivity":1,"visibility":1,"verified":1,"friend_nb":1,"listed_nb":1,
                  "follower_nb":1,"favorites_nb":1,"len_description":1,"tweet_nb":1,"tweet_user_count":1,
                  "user_lifetime":1,"ff_ratio":1}},
 
