@@ -43,3 +43,16 @@ plt.legend()
 plt.savefig("./images/4_1.minikmeans_representation.png")
 plt.show()
 
+#Plot kmeans results on 3d
+ax = plt.figure().add_subplot(projection='3d')
+ax.scatter(X["pca0"],X["pca1"],X["pca2"],c = data.partition,s=0.5)
+ax.scatter(Centroids.loc[:,0],Centroids.loc[:,1],Centroids.loc[:,2],c="red",label="centroids")
+plt.suptitle("Clusters centroids and repartition")
+ax.set_xlabel('Première composante principale')
+ax.set_ylabel('Deuxième composante principale')
+ax.set_xlim(-5,50)
+ax.set_ylim(-20,20)
+ax.legend()
+ax.savefig("./images/4_1.3D_minikmeans_representation.png")
+plt.show()
+
