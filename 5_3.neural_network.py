@@ -80,7 +80,7 @@ def model_02():
 
 """---------------- Choose and train the model ----------------"""
 #Call model and print the summary
-model = model_02()
+model = model_01()
 model.summary()
 #Compile to define the training of the model
 model.compile(
