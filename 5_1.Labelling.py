@@ -11,6 +11,7 @@ author : Nathan Davouse
 from pymongo import MongoClient
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 #connect from Mongo DB and import it on pandas
 client = MongoClient("localhost", 27017)
