@@ -14,7 +14,7 @@ features_to_analyse = [
 ]
 
 # Liste des colonnes pour le groupement
-features_to_group = ["svm", "nn", 'cah']  # Remplacez par vos propres colonnes
+features_to_group = ["svm", "nn", "cah", "kmeans"]  # Remplacez par vos propres colonnes
 
 # Création du fichier Excel avec plusieurs onglets
 output_file = "summary_statistics_multi.xlsx"
