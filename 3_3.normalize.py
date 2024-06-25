@@ -9,6 +9,7 @@ author : Nathan Davouse
 from pymongo import MongoClient
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
 
 #Connection with mongoDB
 client = MongoClient("localhost", 27017)
@@ -17,6 +18,18 @@ collec = db.user_db
 
 data = pd.DataFrame(list(collec.find()))
 id_list = data.pop("_id")
+
+#Plot mean and std of attributes
+mean_df = pd.DataFrame(data.mean(axis = 0))
+std_df = pd.DataFrame(data.std(axis = 0))
+fig, ax = plt.subplots(2)
+ax[0].barh(mean_df.index,mean_df[0])
+ax[1].barh(std_df.index,std_df[0])
+fig.suptitle("Effect of the normalization")
+ax[0].set_title("mean of the attribute")
+ax[1].set_xlabel("standard deviation of the attribute")
+fig.savefig("./images/3_3.mean_std_normalize.png")
+plt.show()
 
 features = ['verified', 'friend_nb',
         'listed_nb', 'follower_nb', 'favorites_nb', 'len_description',
