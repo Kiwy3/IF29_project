@@ -65,17 +65,6 @@ def model_02():
     ])
     model._name = "IF29_classif_model_02"
     return model
-    model = keras.Sequential([
-        layers.Input(shape = (11,),name = "input"),
-        layers.Dropout(rate=0.3),
-        layers.Dense(units=10, activation='relu',name="dense_layer_1"),
-        layers.Dropout(rate=0.3),
-        layers.Dense(units=10, activation='relu',name="dense_layer_2"),
-        #Output layer
-        layers.Dense(1,activation= 'sigmoid',name = "output")
-    ])
-    model._name = "IF29_031"
-    return model
 
 
 """---------------- Choose and train the model ----------------"""
