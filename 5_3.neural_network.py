@@ -172,3 +172,12 @@ plt.title("Répartition sur les premières composantes de l'ACP")
 plt.savefig("./images/5_3.NN_results_"+model._name+".png")
 plt.show()
 
+# Charger les données de la base de données B
+db_B = client['IF29']
+collection_B = db_B['user_db']
+
+# Mettre à jour les documents de la base de données B avec le label prédit
+for index, row in X.iterrows():
+    id_value = row['_id']
+    predicted_label = row['Prediction']
+    collection_B.update_one({'_id': id_value}, {'$set': {'nn': predicted_label}})

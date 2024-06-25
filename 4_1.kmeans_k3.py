@@ -56,3 +56,12 @@ ax.legend()
 ax.savefig("./images/4_1.3D_minikmeans_representation.png")
 plt.show()
 
+# Charger les données de la base de données B
+db_B = client['IF29']
+collection_B = db_B['user_db']
+
+# Mettre à jour les documents de la base de données B avec les étiquettes de partition
+for index, row in data.iterrows():
+    id_value = row['_id']
+    cluster_label = int(row['partition'])  # Assurez-vous que le label est converti en int si nécessaire
+    collection_B.update_one({'_id': id_value}, {'$set': {'kmeans': cluster_label}})
